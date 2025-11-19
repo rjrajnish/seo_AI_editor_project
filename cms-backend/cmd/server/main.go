@@ -1,37 +1,38 @@
-
 package main
 
 import (
-    "context"
-    "log"
-    "time"
+	"log"
+	"time"
+	"context"
 
-    "github.com/gofiber/fiber/v2"
-    flog "github.com/gofiber/fiber/v2/middleware/logger"
-    "go.mongodb.org/mongo-driver/mongo"
-    "go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/gofiber/fiber/v2"
+	flog "github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
-    "github.com/example/cms-backend/internal/api"
-    "github.com/example/cms-backend/internal/config"
+	"github.com/rjrajnish/seo_AI_editor_project/cms-backend/internal/api"
+	"github.com/rjrajnish/seo_AI_editor_project/cms-backend/internal/config"
 )
 
 func main() {
-    cfg := config.LoadConfig()
+	_ = godotenv.Load() // optional; reads .env
 
-    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-    defer cancel()
-    client, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.MongoURI))
-    if err != nil { log.Fatal(err) }
-    if err := client.Ping(ctx, nil); err != nil { log.Fatal("mongo ping failed: ", err) }
-    db := client.Database(cfg.DBName)
+	cfg := config.LoadConfig()
 
-    app := fiber.New()
-    app.Use(flog.New())
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-    api.SetupRoutes(app, db, cfg)
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.MongoURI))
+	if err != nil { log.Fatal(err) }
+	if err := client.Ping(ctx, nil); err != nil { log.Fatal("mongo ping failed: ", err) }
+	db := client.Database(cfg.DBName)
 
-    port := cfg.Port
-    if port == "" { port = "8080" }
-    log.Println("server starting on :" + port)
-    log.Fatal(app.Listen(":" + port))
+	app := fiber.New()
+	app.Use(flog.New())
+
+	api.Register(app, db, cfg)
+
+	log.Println("starting server on :" + cfg.Port)
+	log.Fatal(app.Listen(":" + cfg.Port))
 }

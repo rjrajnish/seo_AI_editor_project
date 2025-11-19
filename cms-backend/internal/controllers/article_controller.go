@@ -1,65 +1,75 @@
-
 package controllers
 
 import (
-    "context"
-    "time"
+	"context"
+	"time"
 
-    "github.com/gofiber/fiber/v2"
-    "go.mongodb.org/mongo-driver/bson/primitive"
-    "github.com/example/cms-backend/internal/models"
-    "github.com/example/cms-backend/internal/repositories"
-    "github.com/example/cms-backend/internal/config"
+	"github.com/gofiber/fiber/v2"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+
+	"github.com/rjrajnish/seo_AI_editor_project/cms-backend/internal/config"
+	"github.com/rjrajnish/seo_AI_editor_project/cms-backend/internal/models"
+	"github.com/rjrajnish/seo_AI_editor_project/cms-backend/internal/repositories"
 )
 
-type ArticleController struct { repo *repositories.ArticleRepository; cfg config.Config }
+type ArticleController struct{ Repo *repositories.ArticleRepo; Cfg config.Config }
 
-func NewArticleController(db *mongo.Database, cfg config.Config) *ArticleController{
-    return &ArticleController{ repo: repositories.NewArticleRepository(db), cfg: cfg }
+func NewArticleController(db *mongo.Database, cfg config.Config) *ArticleController {
+	return &ArticleController{ Repo: repositories.NewArticleRepo(db), Cfg: cfg }
 }
 
-func (ac *ArticleController) Create(c *fiber.Ctx) error{
+func (a *ArticleController) Create(c *fiber.Ctx) error {
     var body models.Article
-    if err := c.BodyParser(&body); err != nil { return c.Status(400).JSON(fiber.Map{"error":"invalid"}) }
+
+    if err := c.BodyParser(&body); err != nil {
+        return c.Status(400).JSON(fiber.Map{"error": "invalid json: " + err.Error()})
+    }
+
     body.ID = primitive.NewObjectID()
     body.UUID = primitive.NewObjectID().Hex()
-    body.CreatedAt = primitive.NewDateTimeFromTime(time.Now())
-    body.UpdatedAt = body.CreatedAt
-    if err := ac.repo.Create(context.Background(), &body); err != nil { return c.Status(500).JSON(fiber.Map{"error":err.Error()}) }
+
+    now := time.Now()
+    body.CreatedAt = now
+    body.UpdatedAt = now
+
+    if err := a.Repo.Create(context.Background(), &body); err != nil {
+        return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+    }
+
     return c.JSON(body)
 }
 
-func (ac *ArticleController) List(c *fiber.Ctx) error{
-    items, err := ac.repo.List(context.Background())
-    if err != nil { return c.Status(500).JSON(fiber.Map{"error":err.Error()}) }
-    return c.JSON(items)
+
+func (a *ArticleController) List(c *fiber.Ctx) error {
+	out, err := a.Repo.List(context.Background())
+	if err != nil { return c.Status(500).JSON(fiber.Map{"error":err.Error()}) }
+	return c.JSON(out)
 }
 
-func (ac *ArticleController) GetByID(c *fiber.Ctx) error{
-    id := c.Params("id")
-    oid, err := primitive.ObjectIDFromHex(id)
-    if err != nil { return c.Status(400).JSON(fiber.Map{"error":"invalid id"}) }
-    a, err := ac.repo.FindByID(context.Background(), oid)
-    if err != nil { return c.Status(500).JSON(fiber.Map{"error":err.Error()}) }
-    if a==nil { return c.Status(404).JSON(fiber.Map{"error":"not found"}) }
-    return c.JSON(a)
+func (a *ArticleController) GetByID(c *fiber.Ctx) error {
+	id := c.Params("id")
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil { return c.Status(400).JSON(fiber.Map{"error":"invalid id"}) }
+	art, err := a.Repo.FindByID(context.Background(), oid)
+	if err != nil { return c.Status(500).JSON(fiber.Map{"error":err.Error()}) }
+	if art==nil { return c.Status(404).JSON(fiber.Map{"error":"not found"}) }
+	return c.JSON(art)
 }
 
-func (ac *ArticleController) Update(c *fiber.Ctx) error{
-    id := c.Params("id")
-    oid, err := primitive.ObjectIDFromHex(id)
-    if err != nil { return c.Status(400).JSON(fiber.Map{"error":"invalid id"}) }
-    var body map[string]interface{}
-    if err := c.BodyParser(&body); err != nil { return c.Status(400).JSON(fiber.Map{"error":"invalid"}) }
-    body["updated_at"] = primitive.NewDateTimeFromTime(time.Now())
-    if err := ac.repo.Update(context.Background(), oid, body); err != nil { return c.Status(500).JSON(fiber.Map{"error":err.Error()}) }
-    return c.JSON(fiber.Map{"ok":true})
+func (a *ArticleController) Update(c *fiber.Ctx) error {
+	id := c.Params("id")
+	oid, _ := primitive.ObjectIDFromHex(id)
+	var body map[string]interface{}
+	if err := c.BodyParser(&body); err != nil { return c.Status(400).JSON(fiber.Map{"error":"invalid"}) }
+	body["updated_at"] = primitive.NewDateTimeFromTime(time.Now())
+	if err := a.Repo.Update(context.Background(), oid, body); err != nil { return c.Status(500).JSON(fiber.Map{"error":err.Error()}) }
+	return c.JSON(fiber.Map{"ok":true})
 }
 
-func (ac *ArticleController) Delete(c *fiber.Ctx) error{
-    id := c.Params("id")
-    oid, err := primitive.ObjectIDFromHex(id)
-    if err != nil { return c.Status(400).JSON(fiber.Map{"error":"invalid id"}) }
-    if err := ac.repo.Delete(context.Background(), oid); err != nil { return c.Status(500).JSON(fiber.Map{"error":err.Error()}) }
-    return c.JSON(fiber.Map{"ok":true})
+func (a *ArticleController) Delete(c *fiber.Ctx) error {
+	id := c.Params("id")
+	oid, _ := primitive.ObjectIDFromHex(id)
+	if err := a.Repo.Delete(context.Background(), oid); err != nil { return c.Status(500).JSON(fiber.Map{"error":err.Error()}) }
+	return c.JSON(fiber.Map{"ok":true})
 }
