@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -73,3 +74,68 @@ func (a *ArticleController) Delete(c *fiber.Ctx) error {
 	if err := a.Repo.Delete(context.Background(), oid); err != nil { return c.Status(500).JSON(fiber.Map{"error":err.Error()}) }
 	return c.JSON(fiber.Map{"ok":true})
 }
+
+func (a *ArticleController) ListAdvanced(c *fiber.Ctx) error {
+    search := c.Query("search", "")
+    status := c.Query("status", "")
+    page, _ := strconv.Atoi(c.Query("page", "1"))
+    limit := 10
+    skip := (page - 1) * limit
+
+    articles, err := a.Repo.ListAdvanced(context.Background(), search, status, skip, limit)
+    if err != nil { return c.Status(500).JSON(fiber.Map{"error": err.Error()}) }
+
+    total, _ := a.Repo.Count(context.Background(), search, status)
+
+    return c.JSON(fiber.Map{
+        "data": articles,
+        "page": page,
+        "limit": limit,
+        "total": total,
+    })
+}
+
+func (a *ArticleController) UpdateStatus(c *fiber.Ctx) error {
+    id := c.Params("id")
+    oid, err := primitive.ObjectIDFromHex(id)
+    if err != nil {
+        return c.Status(400).JSON(fiber.Map{"error": "invalid id"})
+    }
+
+    var body struct {
+        Status string `json:"status"`
+    }
+
+    if err := c.BodyParser(&body); err != nil {
+        return c.Status(400).JSON(fiber.Map{"error": "invalid json"})
+    }
+
+    update := map[string]interface{}{
+        "status":     body.Status,
+        "updated_at": primitive.NewDateTimeFromTime(time.Now()),
+    }
+
+    if err := a.Repo.Update(context.Background(), oid, update); err != nil {
+        return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+    }
+
+    return c.JSON(fiber.Map{"ok": true})
+}
+func (a *ArticleController) GetSEOScore(c *fiber.Ctx) error {
+    id := c.Params("id")
+    oid, err := primitive.ObjectIDFromHex(id)
+    if err != nil {
+        return c.Status(400).JSON(fiber.Map{"error": "invalid id"})
+    }
+
+    art, err := a.Repo.FindByID(context.Background(), oid)
+    if err != nil || art == nil {
+        return c.Status(404).JSON(fiber.Map{"error": "not found"})
+    }
+
+    // basic formula
+    seoScore := len(art.Content)%100 + 50
+
+    return c.JSON(fiber.Map{"seo_score": seoScore})
+}
+

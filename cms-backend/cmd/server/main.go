@@ -7,6 +7,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	flog "github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -16,7 +18,7 @@ import (
 )
 
 func main() {
-	_ = godotenv.Load() // optional; reads .env
+	_ = godotenv.Load()
 
 	cfg := config.LoadConfig()
 
@@ -24,11 +26,27 @@ func main() {
 	defer cancel()
 
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.MongoURI))
-	if err != nil { log.Fatal(err) }
-	if err := client.Ping(ctx, nil); err != nil { log.Fatal("mongo ping failed: ", err) }
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := client.Ping(ctx, nil); err != nil {
+		log.Fatal("mongo ping failed: ", err)
+	}
+
 	db := client.Database(cfg.DBName)
 
 	app := fiber.New()
+
+	// =====================
+	//     ENABLE CORS
+	// =====================
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     "http://localhost:5173",
+		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
+		AllowMethods:     "GET, POST, PUT, DELETE, OPTIONS",
+		AllowCredentials: true,
+	}))
+
 	app.Use(flog.New())
 
 	api.Register(app, db, cfg)

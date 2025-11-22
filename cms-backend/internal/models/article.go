@@ -15,7 +15,7 @@ type Article struct {
     AuthorUUID  string             `bson:"author_uuid" json:"author_uuid"`
     Tags        []string           `bson:"tags" json:"tags"`
     SeoScore    int                `bson:"seo_score" json:"seo_score"`
-    Published   bool               `bson:"published" json:"published"`
+    Status   string               `bson:"status" json:"status"`
     CreatedAt   time.Time          `bson:"created_at" json:"created_at"`
     UpdatedAt   time.Time          `bson:"updated_at" json:"updated_at"`
 }

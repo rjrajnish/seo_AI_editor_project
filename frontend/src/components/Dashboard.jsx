@@ -166,7 +166,7 @@ export default function DashboardLayout() {
       <main className="flex-1 ">
         <header className="flex justify-between items-center mb-10">
           <h2 className="text-3xl font-bold">Dashboard</h2>
-          <p className="text-gray-600">User: Rajnish</p>
+           
         </header>
 
         {/* Cards Grid */}

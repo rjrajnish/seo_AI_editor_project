@@ -36,7 +36,7 @@ func (u *UserController) Login(c *fiber.Ctx) error {
 	user, err := u.Repo.FindByEmail(context.Background(), body.Email)
 	if err != nil || user==nil { return c.Status(401).JSON(fiber.Map{"error":"invalid credentials"}) }
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(body.Password)); err != nil { return c.Status(401).JSON(fiber.Map{"error":"invalid credentials"}) }
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{"sub": user.UUID, "exp": time.Now().Add(24*time.Hour).Unix()})
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{ "user_id": user.ID, "user_name": user.Name,"user_role": user.Role, "user_UUID": user.UUID, "exp": time.Now().Add(24*time.Hour).Unix()})
 	signed, _ := token.SignedString([]byte(u.Cfg.JWTSecret))
 	return c.JSON(fiber.Map{"token": signed,"user_UUID": user.UUID})
 }
