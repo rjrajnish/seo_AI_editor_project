@@ -1,13 +1,13 @@
 package main
 
 import (
+	"context"
 	"log"
 	"time"
-	"context"
 
 	"github.com/gofiber/fiber/v2"
-	flog "github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	flog "github.com/gofiber/fiber/v2/middleware/logger"
 
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -15,13 +15,14 @@ import (
 
 	"github.com/rjrajnish/seo_AI_editor_project/cms-backend/internal/api"
 	"github.com/rjrajnish/seo_AI_editor_project/cms-backend/internal/config"
+	"github.com/rjrajnish/seo_AI_editor_project/cms-backend/internal/services"
 )
 
 func main() {
 	_ = godotenv.Load()
 
 	cfg := config.LoadConfig()
-
+services.PrintGeminiModels(cfg.GeminiAPIKey)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 

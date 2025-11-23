@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -15,57 +16,95 @@ import (
 )
 
 type AIController struct {
-    Repo    *repositories.AIRepo
-    Service *services.AIService
-    Cfg     config.Config
+	Repo    *repositories.AIRepo
+	Service *services.AIService
+	Cfg     config.Config
 }
 
 func NewAIController(db *mongo.Database, cfg config.Config) *AIController {
-    return &AIController{
-        Repo:    repositories.NewAIRepo(db),
-        Service: services.NewAIService(),
-        Cfg:     cfg,
-    }
+
+	// ⭐ AI Service now requires Gemini API key
+	aiService, err := services.NewAIService(cfg.GeminiAPIKey)
+	if err != nil {
+		panic("Failed to initialize AIService: " + err.Error())
+	}
+
+	return &AIController{
+		Repo:    repositories.NewAIRepo(db),
+		Service: aiService,
+		Cfg:     cfg,
+	}
 }
-
-// ------------------ AI TOOLS ------------------
-
 func (a *AIController) GenerateTitle(c *fiber.Ctx) error {
-    var body struct{ Topic string `json:"topic"` }
+	var body struct{ Topic string `json:"topic"` }
 
-    if err := c.BodyParser(&body); err != nil {
-        return c.Status(400).JSON(fiber.Map{"error": "invalid body"})
-    }
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(400).JSON(fiber.Map{"error": "invalid body"})
+	}
 
-    return c.JSON(fiber.Map{"titles": a.Service.GenerateTitle(body.Topic)})
+	titles, err := a.Service.GenerateTitle(body.Topic)
+	if err != nil {
+        fmt.Println("AI Service Error:", err)
+		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.JSON(fiber.Map{"titles": titles})
 }
-
 func (a *AIController) GenerateOutline(c *fiber.Ctx) error {
-    var body struct{ Topic string `json:"topic"` }
-    c.BodyParser(&body)
+	var body struct{ Topic string `json:"topic"` }
 
-    return c.JSON(fiber.Map{"outline": a.Service.GenerateOutline(body.Topic)})
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(400).JSON(fiber.Map{"error": "invalid body"})
+	}
+
+	outline, err := a.Service.GenerateOutline(body.Topic)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.JSON(fiber.Map{"outline": outline})
 }
-
 func (a *AIController) GenerateMeta(c *fiber.Ctx) error {
-    var body struct{ Topic string `json:"topic"` }
-    c.BodyParser(&body)
+	var body struct{ Topic string `json:"topic"` }
 
-    return c.JSON(fiber.Map{"meta_description": a.Service.GenerateMeta(body.Topic)})
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(400).JSON(fiber.Map{"error": "invalid body"})
+	}
+
+	meta, err := a.Service.GenerateMeta(body.Topic)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.JSON(fiber.Map{"meta_description": meta})
 }
-
 func (a *AIController) GenerateKeywords(c *fiber.Ctx) error {
-    var body struct{ Topic string `json:"topic"` }
-    c.BodyParser(&body)
+	var body struct{ Topic string `json:"topic"` }
 
-    return c.JSON(fiber.Map{"keywords": a.Service.GenerateKeywords(body.Topic)})
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(400).JSON(fiber.Map{"error": "invalid body"})
+	}
+
+	keywords, err := a.Service.GenerateKeywords(body.Topic)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.JSON(fiber.Map{"keywords": keywords})
 }
-
 func (a *AIController) GenerateArticle(c *fiber.Ctx) error {
-    var body struct{ Topic string `json:"topic"` }
-    c.BodyParser(&body)
+	var body struct{ Topic string `json:"topic"` }
 
-    return c.JSON(fiber.Map{"article": a.Service.GenerateArticle(body.Topic)})
+	if err := c.BodyParser(&body); err != nil {
+		return c.Status(400).JSON(fiber.Map{"error": "invalid body"})
+	}
+
+	article, err := a.Service.GenerateArticle(body.Topic)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.JSON(fiber.Map{"article": article})
 }
 
 // ----------------- PROMPT EDITOR -----------------

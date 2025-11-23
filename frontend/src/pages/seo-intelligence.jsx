@@ -5,16 +5,18 @@ import { getSEO_Intelligence } from "../apis";
 export default function SEOIntelligence() {
   const [keyword, setKeyword] = useState("");
   const [seo_data, setSeoData] = useState({});
+  const [loading, setLoading] = useState(false);
   const fetchSeoIntelligence = async () => {
     if (!keyword) return;
     try {
       const data = {
         keyword: keyword,
       };
+      setLoading(true);
       const response = await getSEO_Intelligence(data);
 
       setSeoData(response?.data);
-      console.log(response?.data);
+     setLoading(false);
     } catch (error) {
       console.error(error);
     }
@@ -41,6 +43,11 @@ export default function SEOIntelligence() {
           Analyze
         </button>
       </div>
+<> 
+<div>
+  {loading && <p>Loading...</p>}
+</div>
+
 
       {/* Top Cards Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -112,6 +119,7 @@ export default function SEOIntelligence() {
           ))}
         </div>
       </div>
+      </>
     </Layout>
   );
 }

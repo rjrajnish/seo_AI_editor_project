@@ -2,9 +2,10 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/rjrajnish/seo_AI_editor_project/cms-backend/internal/repositories"
@@ -20,15 +21,21 @@ type SEOController struct {
 }
 
 func NewSEOController(db *mongo.Database, cfg config.Config) *SEOController {
+    service, err := services.NewSEOService(cfg.GeminiAPIKey)
+    if err != nil {
+        panic(fmt.Errorf("failed to initialize SEOService: %v", err))
+    }
+
     return &SEOController{
         Repo:    repositories.NewSEORepo(db),
-        Service: services.NewSEOService(),
+        Service: service,
         Cfg:     cfg,
     }
 }
 
-func (s *SEOController) Analyze(c *fiber.Ctx) error {
 
+
+func (s *SEOController) AnalyzeKeyword(c *fiber.Ctx) error {
     var body struct {
         Keyword string `json:"keyword"`
     }
@@ -37,10 +44,15 @@ func (s *SEOController) Analyze(c *fiber.Ctx) error {
         return c.Status(400).JSON(fiber.Map{"error": "invalid body"})
     }
 
-    seo := s.Service.GenerateSEOInsight(body.Keyword)
-    seo.ID = primitive.NewObjectID()
+    seo, err := s.Service.GenerateSEOInsight(body.Keyword)
+if err != nil {
+    fmt.Println("SEO Service Error:", err)
+    return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+}
+
 
     _ = s.Repo.Save(context.Background(), seo)
 
     return c.JSON(seo)
 }
+

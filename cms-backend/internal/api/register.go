@@ -43,7 +43,7 @@ func Register(app *fiber.App, db *mongo.Database, cfg config.Config) {
 	api.Put("/settings", settingsCtrl.UpdateSettings)
 
 	seoCtrl := controllers.NewSEOController(db, cfg)
-	api.Post("/seo/intelligence", seoCtrl.Analyze)
+	api.Post("/seo/intelligence", seoCtrl.AnalyzeKeyword)
 
 	ai := controllers.NewAIController(db, cfg)
 
