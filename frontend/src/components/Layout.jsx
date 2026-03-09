@@ -20,7 +20,13 @@ export default function Layout({ children }) {
     window.location.href = "/auth"; // redirect
   };
 
-  const showProfile=jwtDecode(localStorage.getItem("user_token"));
+  let showProfile = {};
+  try {
+    const token = localStorage.getItem("user_token");
+    showProfile = token ? jwtDecode(token) : {};
+  } catch (e) {
+    showProfile = {};
+  }
  
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -74,9 +80,9 @@ export default function Layout({ children }) {
               <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-md py-2 z-20">
                 <button
                   className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-gray-700"
-                  onClick={() => alert("Profile Page Coming Soon!")}
+                  onClick={() => setOpen(false)}
                 >
-                  Profile
+                  {showProfile?.user_name || "User"}
                 </button>
 
                 <button

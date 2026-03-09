@@ -64,8 +64,13 @@ export const registerUser = async (payload) => {
 // (Add / Fetch / Update / Delete)
 // ==========================
 
-export const getArticles = async (page=1) => {
-  return await API.get(`/articles?page=${page}`);
+export const getArticles = async (page = 1, filters = {}) => {
+  const params = new URLSearchParams({ page: String(page) });
+
+  if (filters.search) params.set("search", filters.search);
+  if (filters.status && filters.status !== "all") params.set("status", filters.status);
+
+  return await API.get(`/articles?${params.toString()}`);
 };
 
 export const getArticleById = async (id) => {
@@ -115,6 +120,14 @@ export const generatePrompts = async (data) => {
 }
 export const getAllPrompts = async () => {
   return await API.get(`/ai/prompts`);
+}
+
+export const getSettings = async () => {
+  return await API.get(`/settings`);
+}
+
+export const updateSettings = async (data) => {
+  return await API.put(`/settings`, data);
 }
 // ==========================
 // EXPORT DEFAULT API (optional)

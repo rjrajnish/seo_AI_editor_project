@@ -1,4 +1,4 @@
-// src/pages/Analytics.jsx
+import { useMemo, useState } from "react";
 import Layout from "../components/Layout";
 import {
   Chart as ChartJS,
@@ -24,56 +24,253 @@ ChartJS.register(
   Filler
 );
 
+const analyticsByRange = {
+  "30d": {
+    labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
+    sessions: [4200, 4700, 5200, 6100],
+    ranking: [64, 68, 71, 74],
+    topPages: [
+      {
+        title: "SEO Checklist for SaaS Startups",
+        views: 18750,
+        ctr: 4.8,
+        avgPosition: 9.2,
+        trafficShare: 22,
+      },
+      {
+        title: "How to Build Topic Clusters in 2026",
+        views: 14360,
+        ctr: 4.1,
+        avgPosition: 10.8,
+        trafficShare: 17,
+      },
+      {
+        title: "Meta Description Optimization Guide",
+        views: 11840,
+        ctr: 3.7,
+        avgPosition: 12.2,
+        trafficShare: 14,
+      },
+      {
+        title: "AI Content Brief Template",
+        views: 9260,
+        ctr: 4.2,
+        avgPosition: 11.4,
+        trafficShare: 11,
+      },
+      {
+        title: "Internal Linking Strategy Playbook",
+        views: 7815,
+        ctr: 3.5,
+        avgPosition: 13.1,
+        trafficShare: 9,
+      },
+    ],
+    intent: [38, 21, 18, 23],
+  },
+  "90d": {
+    labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep"],
+    sessions: [9800, 11200, 12400, 13900, 15200, 16600],
+    ranking: [56, 60, 62, 66, 69, 73],
+    topPages: [
+      {
+        title: "SEO Checklist for SaaS Startups",
+        views: 49810,
+        ctr: 4.3,
+        avgPosition: 10.2,
+        trafficShare: 20,
+      },
+      {
+        title: "How to Build Topic Clusters in 2026",
+        views: 44175,
+        ctr: 3.9,
+        avgPosition: 11.8,
+        trafficShare: 18,
+      },
+      {
+        title: "Programmatic SEO: End-to-End Framework",
+        views: 38990,
+        ctr: 3.6,
+        avgPosition: 13.1,
+        trafficShare: 16,
+      },
+      {
+        title: "Meta Description Optimization Guide",
+        views: 30145,
+        ctr: 3.4,
+        avgPosition: 13.7,
+        trafficShare: 12,
+      },
+      {
+        title: "Internal Linking Strategy Playbook",
+        views: 25770,
+        ctr: 3.2,
+        avgPosition: 14.6,
+        trafficShare: 10,
+      },
+    ],
+    intent: [40, 19, 17, 24],
+  },
+  "12m": {
+    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    sessions: [8200, 8400, 9100, 9800, 11200, 12400, 13900, 15200, 16600, 18050, 19400, 21200],
+    ranking: [48, 50, 52, 56, 60, 62, 66, 69, 73, 75, 78, 81],
+    topPages: [
+      {
+        title: "SEO Checklist for SaaS Startups",
+        views: 192340,
+        ctr: 4.0,
+        avgPosition: 11.1,
+        trafficShare: 18,
+      },
+      {
+        title: "How to Build Topic Clusters in 2026",
+        views: 175620,
+        ctr: 3.7,
+        avgPosition: 12.4,
+        trafficShare: 16,
+      },
+      {
+        title: "Programmatic SEO: End-to-End Framework",
+        views: 158910,
+        ctr: 3.5,
+        avgPosition: 13.3,
+        trafficShare: 14,
+      },
+      {
+        title: "Technical SEO Monitoring Setup",
+        views: 137280,
+        ctr: 3.2,
+        avgPosition: 14.1,
+        trafficShare: 12,
+      },
+      {
+        title: "Internal Linking Strategy Playbook",
+        views: 120440,
+        ctr: 3.1,
+        avgPosition: 15.0,
+        trafficShare: 10,
+      },
+    ],
+    intent: [42, 18, 16, 24],
+  },
+};
+
 export default function Analytics() {
-  // sample time labels and values
-  const labels = ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"];
+  const [range, setRange] = useState("90d");
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("views");
+  const [sortOrder, setSortOrder] = useState("desc");
 
-  const trafficData = {
-    labels,
-    datasets: [
-      {
-        label: "Sessions",
-        data: [1200, 2100, 1600, 2800, 3300, 3800, 4400],
-        fill: true,
-        tension: 0.35,
-        backgroundColor: "rgba(59,130,246,0.12)", // blue-500 12%
-        borderColor: "rgba(59,130,246,1)",
-        pointBackgroundColor: "rgba(59,130,246,1)",
-        pointRadius: 4,
-      },
-    ],
-  };
+  const currentData = analyticsByRange[range];
 
-  const rankingData = {
-    labels,
-    datasets: [
-      {
-        label: "Avg. Ranking Score",
-        data: [45, 60, 55, 72, 68, 80, 92],
-        fill: false,
-        tension: 0.35,
-        borderColor: "rgba(34,197,94,1)", // green-500
-        backgroundColor: "rgba(34,197,94,0.08)",
-        pointRadius: 4,
-      },
-    ],
-  };
+  const totals = useMemo(() => {
+    const sessions = currentData.sessions;
+    const rankings = currentData.ranking;
 
-  const doughnutData = {
-    labels: ["Informational", "Navigational", "Transactional", "Commercial"],
-    datasets: [
-      {
-        data: [25, 25, 25, 25],
-        backgroundColor: [
-          "rgba(59,130,246,1)",
-          "rgba(96,165,250,0.8)",
-          "rgba(34,197,94,1)",
-          "rgba(14,165,233,0.8)",
-        ],
-        hoverOffset: 8,
-      },
-    ],
-  };
+    const totalSessions = sessions.reduce((acc, value) => acc + value, 0);
+    const latestSessions = sessions[sessions.length - 1] || 0;
+    const previousSessions = sessions[sessions.length - 2] || 0;
+    const sessionsTrend = previousSessions
+      ? ((latestSessions - previousSessions) / previousSessions) * 100
+      : 0;
+
+    const avgRanking =
+      rankings.reduce((acc, value) => acc + value, 0) / (rankings.length || 1);
+    const latestRank = rankings[rankings.length - 1] || 0;
+    const previousRank = rankings[rankings.length - 2] || 0;
+    const rankTrend = latestRank - previousRank;
+
+    const avgCtr =
+      currentData.topPages.reduce((acc, page) => acc + page.ctr, 0) /
+      (currentData.topPages.length || 1);
+
+    return {
+      totalSessions,
+      latestSessions,
+      sessionsTrend,
+      avgRanking,
+      rankTrend,
+      avgCtr,
+    };
+  }, [currentData]);
+
+  const topPages = useMemo(() => {
+    const query = search.trim().toLowerCase();
+
+    const filtered = currentData.topPages.filter((page) =>
+      page.title.toLowerCase().includes(query)
+    );
+
+    const sorted = [...filtered].sort((a, b) => {
+      const left = a[sortBy];
+      const right = b[sortBy];
+
+      if (typeof left === "string") {
+        return sortOrder === "asc"
+          ? left.localeCompare(right)
+          : right.localeCompare(left);
+      }
+
+      return sortOrder === "asc" ? left - right : right - left;
+    });
+
+    return sorted;
+  }, [currentData.topPages, search, sortBy, sortOrder]);
+
+  const trafficData = useMemo(
+    () => ({
+      labels: currentData.labels,
+      datasets: [
+        {
+          label: "Sessions",
+          data: currentData.sessions,
+          fill: true,
+          tension: 0.35,
+          backgroundColor: "rgba(8,145,178,0.12)",
+          borderColor: "#0891b2",
+          pointBackgroundColor: "#0891b2",
+          pointRadius: 3,
+          borderWidth: 2,
+        },
+      ],
+    }),
+    [currentData]
+  );
+
+  const rankingData = useMemo(
+    () => ({
+      labels: currentData.labels,
+      datasets: [
+        {
+          label: "Avg Ranking Score",
+          data: currentData.ranking,
+          fill: false,
+          tension: 0.35,
+          borderColor: "#16a34a",
+          backgroundColor: "rgba(22,163,74,0.08)",
+          pointRadius: 3,
+          borderWidth: 2,
+        },
+      ],
+    }),
+    [currentData]
+  );
+
+  const doughnutData = useMemo(
+    () => ({
+      labels: ["Informational", "Navigational", "Transactional", "Commercial"],
+      datasets: [
+        {
+          data: currentData.intent,
+          backgroundColor: ["#0284c7", "#06b6d4", "#16a34a", "#0ea5e9"],
+          hoverOffset: 6,
+          borderWidth: 0,
+        },
+      ],
+    }),
+    [currentData]
+  );
 
   const lineOptions = {
     responsive: true,
@@ -85,11 +282,11 @@ export default function Analytics() {
     scales: {
       x: {
         grid: { display: false },
-        ticks: { color: "#4b5563" },
+        ticks: { color: "#64748b" },
       },
       y: {
-        grid: { color: "#e6edf3" },
-        ticks: { color: "#4b5563", beginAtZero: true },
+        grid: { color: "#e2e8f0" },
+        ticks: { color: "#64748b", beginAtZero: true },
       },
     },
   };
@@ -98,149 +295,198 @@ export default function Analytics() {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { position: "bottom" },
+      legend: { position: "bottom", labels: { color: "#475569" } },
       tooltip: {},
     },
+    cutout: "65%",
+  };
+
+  const changeSort = (field) => {
+    if (sortBy === field) {
+      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortBy(field);
+      setSortOrder("desc");
+    }
+  };
+
+  const formatTrend = (value, suffix = "%") => {
+    const sign = value > 0 ? "+" : "";
+    return `${sign}${value.toFixed(1)}${suffix}`;
   };
 
   return (
     <Layout>
-      <h1 className="text-2xl font-bold mb-6">Analytics</h1>
+      <section className="rounded-3xl bg-gradient-to-br from-slate-900 via-cyan-900 to-sky-700 p-6 shadow-xl sm:p-8">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-white sm:text-3xl">Analytics</h1>
+            <p className="mt-2 max-w-3xl text-sm text-cyan-100 sm:text-base">
+              Track SEO growth, ranking trends, and page-level performance with a single responsive analytics workspace.
+            </p>
+          </div>
 
-      {/* Top Charts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        {/* Traffic Overview */}
-        <div className="bg-white p-6 rounded-xl shadow h-[300px]">
-          <h3 className="text-lg font-semibold mb-4">Traffic Overview</h3>
-          <div className="h-full">
+          <div className="inline-flex w-fit rounded-xl bg-white/15 p-1">
+            {[
+              { key: "30d", label: "30 Days" },
+              { key: "90d", label: "90 Days" },
+              { key: "12m", label: "12 Months" },
+            ].map((item) => (
+              <button
+                key={item.key}
+                type="button"
+                onClick={() => setRange(item.key)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition sm:text-sm ${
+                  range === item.key
+                    ? "bg-white text-slate-900"
+                    : "text-cyan-100 hover:bg-white/10"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <p className="text-sm font-medium text-slate-500">Total Sessions</p>
+          <p className="mt-2 text-3xl font-bold text-slate-900">
+            {totals.totalSessions.toLocaleString()}
+          </p>
+          <p className="mt-2 text-xs font-semibold text-emerald-600">
+            {formatTrend(totals.sessionsTrend)} vs previous period
+          </p>
+        </article>
+
+        <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <p className="text-sm font-medium text-slate-500">Latest Sessions</p>
+          <p className="mt-2 text-3xl font-bold text-slate-900">
+            {totals.latestSessions.toLocaleString()}
+          </p>
+          <p className="mt-2 text-xs text-slate-500">Current interval snapshot</p>
+        </article>
+
+        <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <p className="text-sm font-medium text-slate-500">Average Ranking</p>
+          <p className="mt-2 text-3xl font-bold text-slate-900">
+            {totals.avgRanking.toFixed(1)}
+          </p>
+          <p className="mt-2 text-xs font-semibold text-emerald-600">
+            {formatTrend(totals.rankTrend, " pts")} in latest interval
+          </p>
+        </article>
+
+        <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <p className="text-sm font-medium text-slate-500">Average CTR</p>
+          <p className="mt-2 text-3xl font-bold text-slate-900">
+            {totals.avgCtr.toFixed(2)}%
+          </p>
+          <p className="mt-2 text-xs text-slate-500">Based on tracked top pages</p>
+        </article>
+      </section>
+
+      <section className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h3 className="text-lg font-semibold text-slate-900">Traffic Overview</h3>
+          <div className="mt-4 h-72">
             <Line data={trafficData} options={lineOptions} />
           </div>
-        </div>
+        </article>
 
-        {/* Keyword Rankings */}
-        <div className="bg-white p-6 rounded-xl shadow h-[300px]">
-          <h3 className="text-lg font-semibold mb-4">Keyword Rankings</h3>
-          <div className="h-full">
+        <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h3 className="text-lg font-semibold text-slate-900">Keyword Rankings</h3>
+          <div className="mt-4 h-72">
             <Line data={rankingData} options={lineOptions} />
           </div>
-        </div>
-      </div>
+        </article>
+      </section>
 
-      {/* Middle Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        {/* Top Pages */}
-        <div className="bg-white p-6 rounded-xl shadow md:col-span-2">
-            <div className="flex justify-between"> <h3 className="text-lg font-semibold mb-4">Top Pages</h3>
-          <h3 className="text-lg font-semibold mb-4">Avarage CTR: 3.52%</h3></div>
-         
-          <table className="w-full text-left">
-            <thead>
-              <tr className="text-gray-600 border-b bg-gray-100">
-                <th className="py-2">Page Title</th>
-                <th className="py-2">Views</th>
-                <th className="py-2">CTR</th>
-                <th className="py-2">Avg.</th>
-                <th className="py-2">Svs.</th>
-              </tr>
-            </thead>
+      <section className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-2">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h3 className="text-lg font-semibold text-slate-900">Top Pages</h3>
 
-            <tbody>
-              <tr className="border-b">
-                <td className="py-2">Page Title 1</td>
-                <td className="py-2">35,210</td>
-                <td className="py-2">4.25%</td>
-                <td className="py-2">11</td>
-                <td className="py-2">—</td>
-              </tr>
-
-              <tr className="border-b">
-                <td className="py-2">Page Title 2</td>
-                <td className="py-2">26,170</td>
-                <td className="py-2">4.25%</td>
-                <td className="py-2">12</td>
-                <td className="py-2">—</td>
-              </tr>
-
-              <tr className="border-b">
-                <td className="py-2">Page Title 3</td>
-                <td className="py-2">17,735</td>
-                <td className="py-2">3.70%</td>
-                <td className="py-2">10</td>
-                <td className="py-2">—</td>
-              </tr>
-
-         
-              <tr className="border-b">
-                <td className="py-2">Page Title 4</td>
-                <td className="py-2">7,739</td>
-                <td className="py-2">4.25%</td>
-                <td className="py-2">9</td>
-                <td className="py-2">—</td>
-              </tr>
-        
-              <tr  >
-                <td className="py-2">Page Title 4</td>
-                <td className="py-2">7,739</td>
-                <td className="py-2">4.25%</td>
-                <td className="py-2">9</td>
-                <td className="py-2">—</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        {/* Average CTR + Doughnut */}
-        <div className="space-y-6">
-           
-
-          <div className="bg-white p-6 rounded-xl shadow h-[340px] ">
-            <h3 className="text-lg font-semibold mb-4">Average Position</h3>
-            <div className="h-[260px]  flex justify-center items-center text-2xl font-semibold text-gray-600  ">
-              <Doughnut data={doughnutData} options={doughnutOptions} />
+            <div className="flex w-full gap-2 sm:w-auto">
+              <input
+                type="text"
+                placeholder="Search pages..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="h-10 w-full rounded-lg border border-slate-300 px-3 text-sm outline-none focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100 sm:w-64"
+              />
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Bottom Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Search Intent Distribution */}
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h3 className="text-lg font-semibold mb-4">
-            Search Intent Distribution
-          </h3>
+          <div className="hidden overflow-x-auto lg:block">
+            <table className="min-w-full text-left">
+              <thead>
+                <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
+                  <th className="py-2 pr-4">
+                    <button type="button" onClick={() => changeSort("title")}>Page Title</button>
+                  </th>
+                  <th className="py-2 pr-4">
+                    <button type="button" onClick={() => changeSort("views")}>Views</button>
+                  </th>
+                  <th className="py-2 pr-4">
+                    <button type="button" onClick={() => changeSort("ctr")}>CTR</button>
+                  </th>
+                  <th className="py-2 pr-4">
+                    <button type="button" onClick={() => changeSort("avgPosition")}>Avg Position</button>
+                  </th>
+                  <th className="py-2 pr-4">
+                    <button type="button" onClick={() => changeSort("trafficShare")}>Traffic Share</button>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {topPages.map((page) => (
+                  <tr key={page.title} className="border-b border-slate-100 hover:bg-slate-50/70">
+                    <td className="py-3 pr-4 font-medium text-slate-800">{page.title}</td>
+                    <td className="py-3 pr-4 text-slate-700">{page.views.toLocaleString()}</td>
+                    <td className="py-3 pr-4 text-slate-700">{page.ctr.toFixed(2)}%</td>
+                    <td className="py-3 pr-4 text-slate-700">{page.avgPosition.toFixed(1)}</td>
+                    <td className="py-3 pr-4 text-slate-700">{page.trafficShare}%</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-          <ul className="space-y-2">
-            <li className="flex items-center gap-2">
-              <span className="w-3 h-3 bg-blue-500 rounded-full"></span>
-              Informational — 25%
-            </li>
+          <div className="space-y-3 lg:hidden">
+            {topPages.map((page) => (
+              <div key={page.title} className="rounded-xl border border-slate-200 p-3">
+                <h4 className="text-sm font-semibold text-slate-800">{page.title}</h4>
+                <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-slate-600">
+                  <p>Views: {page.views.toLocaleString()}</p>
+                  <p>CTR: {page.ctr.toFixed(2)}%</p>
+                  <p>Avg Pos: {page.avgPosition.toFixed(1)}</p>
+                  <p>Share: {page.trafficShare}%</p>
+                </div>
+              </div>
+            ))}
+          </div>
 
-            <li className="flex items-center gap-2">
-              <span className="w-3 h-3 bg-blue-300 rounded-full"></span>
-              Navigational — 25%
-            </li>
+          {topPages.length === 0 && (
+            <p className="mt-3 text-sm text-slate-500">No pages matched your search.</p>
+          )}
+        </article>
 
-            <li className="flex items-center gap-2">
-              <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-              Transactional — 25%
-            </li>
+        <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h3 className="text-lg font-semibold text-slate-900">Search Intent Mix</h3>
+          <div className="mt-4 h-64">
+            <Doughnut data={doughnutData} options={doughnutOptions} />
+          </div>
 
-            <li className="flex items-center gap-2">
-              <span className="w-3 h-3 bg-sky-400 rounded-full"></span>
-              Commercial — 25%
-            </li>
+          <ul className="mt-4 space-y-2 text-sm text-slate-600">
+            <li>Informational: {currentData.intent[0]}%</li>
+            <li>Navigational: {currentData.intent[1]}%</li>
+            <li>Transactional: {currentData.intent[2]}%</li>
+            <li>Commercial: {currentData.intent[3]}%</li>
           </ul>
-        </div>
-
-        {/* Empty / Future widgets */}
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h3 className="text-lg font-semibold mb-4">Notes</h3>
-          <p className="text-sm text-gray-600">
-            Add widgets like device breakdown, geo, etc.
-          </p>
-        </div>
-      </div>
+        </article>
+      </section>
     </Layout>
   );
 }

@@ -2,7 +2,7 @@ import "./App.css";
 
 import { Route, Routes } from "react-router-dom";
 import Dashboard from "./pages/dashboard";
-import Content from "./pages/content";
+import Content from "./pages/Content";
 import AIStudio from "./pages/ai-studio";
 import SEOIntelligence from "./pages/seo-intelligence";
 import Analytics from "./pages/analytics";

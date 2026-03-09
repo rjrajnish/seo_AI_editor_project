@@ -9,6 +9,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	go.mongodb.org/mongo-driver v1.17.6
 	golang.org/x/crypto v0.44.0
+	google.golang.org/api v0.186.0
 )
 
 require (
@@ -36,7 +37,6 @@ require (
 	golang.org/x/net v0.46.0 // indirect
 	golang.org/x/oauth2 v0.21.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
-	google.golang.org/api v0.186.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240617180043-68d350f18fd4 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240617180043-68d350f18fd4 // indirect
 	google.golang.org/grpc v1.64.1 // indirect
@@ -56,7 +56,6 @@ require (
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/montanaflynn/stats v0.7.1 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	github.com/sashabaranov/go-openai v1.41.2
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.51.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect

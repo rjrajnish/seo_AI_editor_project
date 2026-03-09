@@ -21,7 +21,7 @@ func LoadConfig() Config {
         JWTSecret:"ac123"   ,  // getEnv("JWT_SECRET", "replace-me-with-secret"),
         LogLevel: getEnv("LOG_LEVEL", "info"),
         //    OpenAIKey:  "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", // getEnv("OPENAI_KEY", ""),
-        GeminiAPIKey: "AIzaSyB1QBfOntmr2Y9LwhDvijEq___697meMUQ",
+        GeminiAPIKey: "",
     }
 }
 

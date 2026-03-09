@@ -3,6 +3,8 @@ import { loginUser, registerUser } from "../apis";
 
 export default function AuthPage() {
   const [activeTab, setActiveTab] = useState("login");
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [registerLoading, setRegisterLoading] = useState(false);
 
   // Login states
   const [loginEmail, setLoginEmail] = useState("");
@@ -23,6 +25,7 @@ export default function AuthPage() {
 
   const handleLogin = async () => {
     try {
+      setLoginLoading(true);
       setLoginError("");
 
       // Email Validation
@@ -57,11 +60,14 @@ export default function AuthPage() {
         "Something went wrong. Please try again.";
 
       setLoginError(msg);
+    } finally {
+      setLoginLoading(false);
     }
   };
 
   const handleRegister = async () => {
     try {
+      setRegisterLoading(true);
       // Email validation
       if (!validateEmail(regEmail)) {
         setRegError("Please enter a valid email.");
@@ -109,136 +115,204 @@ export default function AuthPage() {
         "Something went wrong. Please try again.";
 
       setRegError(msg);
+    } finally {
+      setRegisterLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
-      <div className="w-full max-w-md bg-white shadow-lg rounded-xl p-6">
-        {/* Tabs */}
-        <div className="flex mb-6 border-b">
-          <button
-            className={`w-1/2 py-2 text-lg font-semibold ${
-              activeTab === "login"
-                ? "border-b-4 border-blue-600 text-blue-600"
-                : "text-gray-500"
-            }`}
-            onClick={() => setActiveTab("login")}
-          >
-            Login
-          </button>
-          <button
-            className={`w-1/2 py-2 text-lg font-semibold ${
-              activeTab === "register"
-                ? "border-b-4 border-blue-600 text-blue-600"
-                : "text-gray-500"
-            }`}
-            onClick={() => setActiveTab("register")}
-          >
-            Register
-          </button>
-        </div>
+    <div className="relative min-h-screen overflow-hidden bg-slate-950 px-4 py-8 sm:px-8">
+      <div className="pointer-events-none absolute -left-20 top-20 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" />
+      <div className="pointer-events-none absolute -right-16 bottom-16 h-80 w-80 rounded-full bg-indigo-500/20 blur-3xl" />
 
-        {/* Login Form */}
-        {activeTab === "login" && (
+      <div className="relative mx-auto flex w-full max-w-6xl overflow-hidden rounded-3xl border border-white/15 bg-white/10 shadow-2xl backdrop-blur-xl">
+        <aside className="hidden w-1/2 flex-col justify-between bg-gradient-to-br from-cyan-600 via-sky-600 to-blue-700 p-10 text-white lg:flex">
           <div>
-            <div className="mb-4">
-              <label className="block mb-1 font-medium">Email</label>
-              <input
-                type="email"
-                className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter your email"
-                value={loginEmail}
-                onChange={(e) => setLoginEmail(e.target.value)}
-              />
-            </div>
+            <p className="text-sm uppercase tracking-[0.22em] text-cyan-100">
+              SEO AI Editor
+            </p>
+            <h1 className="mt-5 text-4xl font-bold leading-tight">
+              Manage your content workflow from one secure workspace.
+            </h1>
+            <p className="mt-5 max-w-md text-sm text-blue-50/90">
+              Sign in to continue optimizing your SEO performance, or create an
+              account to get started with AI-powered content tools.
+            </p>
+          </div>
+          <div className="space-y-3 text-sm text-blue-50/95">
+            <p>Secure authentication</p>
+            <p>Team-ready role management</p>
+            <p>Fast, responsive interface</p>
+          </div>
+        </aside>
 
-            <div className="mb-4">
-              <label className="block mb-1 font-medium">Password</label>
-              <input
-                type="password"
-                className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter password"
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-              />
-            </div>
+        <main className="w-full bg-white/95 p-6 sm:p-8 lg:w-1/2 lg:p-10">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+              {activeTab === "login" ? "Welcome back" : "Create your account"}
+            </h2>
+            <p className="mt-2 text-sm text-slate-500">
+              {activeTab === "login"
+                ? "Enter your credentials to access your dashboard."
+                : "Fill in your details to set up a new workspace profile."}
+            </p>
+          </div>
 
-            {loginError && (
-              <p className="text-red-600 text-sm mb-3">{loginError}</p>
-            )}
-
+          <div className="mb-8 grid grid-cols-2 rounded-xl bg-slate-100 p-1">
             <button
-              onClick={handleLogin}
-              className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+              type="button"
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                activeTab === "login"
+                  ? "bg-white text-slate-900 shadow"
+                  : "text-slate-500 hover:text-slate-800"
+              }`}
+              onClick={() => setActiveTab("login")}
             >
-              Login Now
+              Login
+            </button>
+            <button
+              type="button"
+              className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                activeTab === "register"
+                  ? "bg-white text-slate-900 shadow"
+                  : "text-slate-500 hover:text-slate-800"
+              }`}
+              onClick={() => setActiveTab("register")}
+            >
+              Register
             </button>
           </div>
-        )}
 
-        {/* Register Form */}
-        {activeTab === "register" && (
-          <div>
-            <div className="mb-4">
-              <label className="block mb-1 font-medium">Full Name</label>
-              <input
-                type="text"
-                className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter your name"
-                value={regName}
-                onChange={(e) => setRegName(e.target.value)}
-              />
-            </div>
+          {activeTab === "login" && (
+            <form
+              className="space-y-5"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!loginLoading) handleLogin();
+              }}
+            >
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100"
+                  placeholder="you@company.com"
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                />
+              </div>
 
-            <div className="mb-4">
-              <label className="block mb-1 font-medium">Email</label>
-              <input
-                type="email"
-                className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter your email"
-                value={regEmail}
-                onChange={(e) => setRegEmail(e.target.value)}
-              />
-            </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100"
+                  placeholder="Enter your password"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                />
+              </div>
 
-            <div className="mb-4">
-              <label className="block mb-1 font-medium">Password</label>
-              <input
-                type="password"
-                className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="Create password"
-                value={regPassword}
-                onChange={(e) => setRegPassword(e.target.value)}
-              />
-            </div>
+              {loginError && (
+                <p className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-600">
+                  {loginError}
+                </p>
+              )}
 
-            <div className="mb-4">
-              <label className="block mb-1 font-medium">Role</label>
-              <select
-                className="w-full border px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500"
-                value={regRole}
-                onChange={(e) => setRegRole(e.target.value)}
+              <button
+                type="submit"
+                disabled={loginLoading}
+                className="w-full rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <option value="">Select Role</option>
-                <option value="admin">Admin</option>
-                <option value="student">Student</option>
-                <option value="staff">Staff</option>
-              </select>
-            </div>
+                {loginLoading ? "Signing in..." : "Login"}
+              </button>
+            </form>
+          )}
 
-            {regError && (
-              <p className="text-red-600 text-sm mb-3">{regError}</p>
-            )}
-
-            <button
-              onClick={handleRegister}
-              className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
+          {activeTab === "register" && (
+            <form
+              className="space-y-5"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!registerLoading) handleRegister();
+              }}
             >
-              Register Now
-            </button>
-          </div>
-        )}
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100"
+                  placeholder="John Doe"
+                  value={regName}
+                  onChange={(e) => setRegName(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100"
+                  placeholder="you@company.com"
+                  value={regEmail}
+                  onChange={(e) => setRegEmail(e.target.value)}
+                />
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100"
+                    placeholder="Create password"
+                    value={regPassword}
+                    onChange={(e) => setRegPassword(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                    Role
+                  </label>
+                  <select
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100"
+                    value={regRole}
+                    onChange={(e) => setRegRole(e.target.value)}
+                  >
+                    <option value="">Select role</option>
+                    <option value="admin">Admin</option>
+                    <option value="student">Student</option>
+                    <option value="staff">Staff</option>
+                  </select>
+                </div>
+              </div>
+
+              {regError && (
+                <p className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-600">
+                  {regError}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={registerLoading}
+                className="w-full rounded-xl bg-cyan-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {registerLoading ? "Creating account..." : "Register"}
+              </button>
+            </form>
+          )}
+        </main>
       </div>
     </div>
   );
